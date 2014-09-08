@@ -12,37 +12,37 @@ Lab 1 is creating a simple calculator in code composser in assembly language.
 
 ###Pseudo Code
 
--	Equate operands to specified byte sequences 
+o	Equate operands to specified byte sequences 
 
--	Set apart RAM storage locations (x20)
+o	Set apart RAM storage locations (x20)
 
--	Type a series of bytes into ROM for calculator sequence
+oType a series of bytes into ROM for calculator sequence
 
--	If even byte, recognize as number
+o	If even byte, recognize as number
 
--	If odd byte, recognize as operand
+o	If odd byte, recognize as operand
 
-o	Store answer, like accumulator, in progressing RAM locations, starting at 0x0201
+-	Store answer, like accumulator, in progressing RAM locations, starting at 0x0201
 
-o	Use answer from accumulator for next operand
+-	Use answer from accumulator for next operand
 
-o	If operation exceeds 255, max the answer at 255 (B functionality)
+-	If operation exceeds 255, max the answer at 255 (B functionality)
 
-o	If operation falls below 0, min the answer at 0 (B functionality)
+-	If operation falls below 0, min the answer at 0 (B functionality)
 
--	Loop back through until END_OP is recognized
+o	Loop back through until END_OP is recognized
 
--	Recognize ADD, SUBTRACT, MULTIPLY (A functionality), CLEAR, and END as operands
+o	Recognize ADD, SUBTRACT, MULTIPLY (A functionality), CLEAR, and END as operands
 
-o	If ADD, use add
+-	If ADD, use add
 
-o	If SUBTRACT, use add with a twos complement
+-	If SUBTRACT, use add with a twos complement
 
-o	If MULTIPLY, look up multiply function in datasheet
+-	If MULTIPLY, look up multiply function in datasheet
 
-o	If CLEAR, store a zero
+-	If CLEAR, store a zero
 
-o	If END, jump forever
+-	If END, jump forever
 
 
 ###Flow Chart

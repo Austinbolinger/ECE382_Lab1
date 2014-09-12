@@ -1,0 +1,158 @@
+;-------------------------------------------------------------------------------
+; MSP430 Assembler Code Template for use with TI Code Composer Studio
+; Lab 1 - Simple Calculator
+; C2C Austin Bolinger, USAF / 08 Sep 14 / 12 Sep 14
+; ECE 382
+;
+; Documentation: Worked in class and got help occansionally from Dr. York
+; 						he checked my logic behind my ideas
+;				C2C Niquette - explained how and why I need to use a pointer for
+;						each of my arrays, otherwise the array would never
+;						increment properly.
+;
+;-------------------------------------------------------------------------------
+            .cdecls C,LIST,"msp430.h"       ; Include device header file
+
+;-------------------------------------------------------------------------------
+ADD_OP:         .equ        0x11			; addition operation for calculator
+SUB_OP:         .equ        0x22			; subtraction operation for calculator
+MUL_OP:		.equ	    0x33			; multiplication opertion for calculator
+CLR_OP:		.equ	    0x44			; clear function for calculator
+END_OP:		.equ	    0x55			; end operation for calculator
+OPERAND:	.equ	    r6				; a register for operand
+ACCUMULATOR:	.equ	    r5				; a register for accumulator
+OPR1:		.equ	    r7				; additional register for the multiplication operation
+OPR2:		.equ	    r8				; additional register for the multiplication operation
+ZEROREG:	.equ	    r9				; zeroed register
+programPointer:	.equ        r10				; incrementer for myProgram
+resultsPointer: .equ	    r11				; incrementer for myResults
+
+      		.data					; RAM
+myResults:	.space	20				; twenty spaces for answers for later
+
+            .text                           ; Assemble into program memory
+            .retain                         ; Override ELF conditional linking
+                                            ; and retain current section
+            .retainrefs                     ; Additionally retain any sections
+                                            ; that have references to current
+myProgram:  .byte	0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0xDD, 0x44, 0x08, 0x22, 0x09, 0x44, 0xFF, 0x22, 0xFD, 0x55
+					    ; operation order
+                                            ; section
+;-------------------------------------------------------------------------------
+RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
+StopWDT     mov.w   #WDTPW|WDTHOLD,&WDTCTL  ; Stop watchdog timer
+
+;-------------------------------------------------------------------------------
+                                            ; Main loop here
+
+Start
+	mov.b	#0, ACCUMULATOR						; initialize the accumulator
+	mov.b	#1, OPERAND						; initialize the operand
+	mov.b	#0, ZEROREG						; zeroing
+	mov	#myProgram, programPointer
+	mov	#myResults, resultsPointer
+
+read									; Method to read the even bytes (numbers)
+	mov.b	0(programPointer), ACCUMULATOR				; stores next number in accumulator
+	inc	programPointer						; increments the program counter in ROM
+
+operand									; Method to read odd bytes (operation)
+	mov.b	0(programPointer), OPERAND				; increments the program counter in ROM
+	inc 	programPointer
+
+	cmp.b	#ADD_OP, OPERAND					; compare to see what the next operand is
+	jeq	addition						; jump if addition
+	cmp.b	#SUB_OP, OPERAND
+	jeq	subtract						; jump if subtraction
+	cmp.b	#MUL_OP, OPERAND
+	jeq	multiply						; jump if multiplication
+	cmp.b	#CLR_OP, OPERAND
+	jeq	clear							; jump if clear
+	jmp	endProgram						; jump to ending Program
+
+addition								; Method for addition operation
+	add.b	0(programPointer), ACCUMULATOR				; add the next number with the accumulator
+	jc	overFlow						; jump to overflow Method if greater than 255
+	inc	programPointer						; increment the program counter in ROM
+	mov.b 	ACCUMULATOR, 0(resultsPointer)				; store answer in RAM
+	inc	resultsPointer						; increment the answer counter in RAM
+	jmp 	operand							; jump back to odd byte reader
+
+subtract								; Method for subtraction
+	sub.b	0(programPointer), ACCUMULATOR				; subtract the next number from accumulator
+	jnc	overFlow0						; jump to overflow Method if less than 0
+	inc	programPointer						; increment the program counter in ROM
+	mov.b 	ACCUMULATOR, 0(resultsPointer)				; store answer in RAM
+	inc	resultsPointer						; increment the answer counter in RAM
+	jmp 	operand							; jump back to odd byte reader
+
+multiply								; Method for multiplication
+	mov.b	0(programPointer), OPR1					; store next number in operand 1
+	mov.b  	#0, OPR2						; clear operand 2
+	xor.b	OPR1, ZEROREG						; xor 0 with r5, that will change the V flag
+									; one if it is odd
+	jeq	jumpEven						; jump if V flag is zero
+	mov.b	OPR1, OPR2						; place operand in operand 2 to perserve original no.
+jumpEven								; Method to handle even cases or not odd cases
+	dec.b	OPR1							; test to see if the number was 1
+	jz	exitMultiply						; exit multiply if the number was 1
+loop									; Method to run through each multiply by 2
+	rla.b	ACCUMULATOR						; multiply by 2
+	dec.b	OPR1							; count down to
+	dec.b	OPR1							; next even number
+	jnz	loop							; continue loop only if not zero
+	jmp 	exitMultiply						; skip to finialize multiply
+exitMultiply								; Method to finish up the multiply method
+	add.b	OPR2, ACCUMULATOR					; add odd number value to multiplied value
+	mov.b	ACCUMULATOR, 0(resultsPointer)				; store the answer in RAM
+	inc.b	resultsPointer						; increment the answer counter in RAM
+	jc 	overFlow						; jump to overflow Method if greater than 255
+	jmp 	operand							; jump back to odd byte reader
+
+clear									; Method for the clear function
+	mov.b	#0, ACCUMULATOR						; clear the accumulator (place a 0 there)
+	mov.b 	ACCUMULATOR, 0(resultsPointer)				; store the answer in RAM
+	inc	resultsPointer
+	mov.b	0(programPointer), ACCUMULATOR
+	inc 	programPointer						; increment the answer counter in RAM
+	jmp 	operand							; jump back to odd byte reader
+
+overFlow								; Method for handling greater than 255
+	mov.b	#255, ACCUMULATOR					; Cap the accumulator at 255 if it overflowed
+	mov.b 	ACCUMULATOR, 0(resultsPointer)				; store the answer in RAM
+	inc	resultsPointer						; increment the answer counter in RAM
+	inc	programPointer
+	jmp 	operand							; jump back to odd byte reader method
+
+overFlow0								; Method for handling less than 0
+	inc	programPointer						; increment the program counter in ROM
+	mov.b	#0, ACCUMULATOR						; Cap the accumulator at 0 if it overflowed
+	mov.b 	ACCUMULATOR, 0(resultsPointer)				; store the answer in RAM
+	inc	resultsPointer						; increment the answer counter in RAM
+
+	jmp 	operand							; jump back to odd byte reader method
+
+endProgram
+	jmp	endProgram						; forever loop
+
+
+
+
+
+
+;-------------------------------------------------------------------------------
+
+
+
+
+;-------------------------------------------------------------------------------
+;           Stack Pointer definition
+;-------------------------------------------------------------------------------
+            .global __STACK_END
+            .sect 	.stack
+
+;-------------------------------------------------------------------------------
+;           Interrupt Vectors
+;-------------------------------------------------------------------------------
+            .sect   ".reset"                ; MSP430 RESET Vector
+            .short  RESET

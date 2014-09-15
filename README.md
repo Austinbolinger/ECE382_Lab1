@@ -1,4 +1,4 @@
-ECE382_Lab1
+ECE382_Lab1 - Simple Calculator
 ===========
 created by Austin Bolinger
 ECE 382: Lab 1
@@ -8,7 +8,7 @@ Edited: 09 SEP 14
 Edited: 10 SEP 14
 End Date: 10 SEP 14
 
-Lab 1 is creating a simple calculator in code composser in assembly language.
+Lab 1 is creating a simple calculator in code composer  in assembly language.
 
 The purpose of this lab is to use what we have learned in class of assembly language to create a simple calculator. It will involve skills with the instruction set, addressing modes, conditional jumps, status register flags, assembler directives, the assembly process, and more. The calculator is simple because it does not have an interface or GUI. The instructions are a set of bytes in a series stored in ROM. The code needs to read every other bit as a number and followed by an operation. The answers after each operation need to be stored in RAM. The calculator needs to handle the add, subtract, clear, and end functions. The calculator for “B” and “A” functionality needs to handle overflow at 0 and 255 and perform multiplication respectively for those letter grades. To receive even more points in the “A” functionality multiplication part, the calculator needs to operate at O(nlogn) speed. 
 
@@ -81,5 +81,36 @@ Result: 0x22, 0x33, 0x44, 0xFF, 0x00, 0x00, 0x00, 0x02
 
 Result: 0x44, 0x11, 0x88, 0x00, 0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0x00, 0xff
 
-#Results
+#Hardware Schematic
 
+![MSP430G2553](http://www.kerrywong.com/blog/wp-content/uploads/2012/03/MSP430G2ExtProg3.jpg?raw=true "MSP430G2553")
+
+![MSP430G2553 Schematic](http://cnx.org/resources/485bbea47ead3338e654ae805f15bc09/graphics3.png?raw=true "MSP430G2553 Schematic")
+
+#CODE
+###Required Functionality Code
+https://github.com/Austinbolinger/ECE382_Lab1/blob/master/lab1RequiredFunctionality.txt
+###B Functionality Code
+https://github.com/Austinbolinger/ECE382_Lab1/blob/master/lab1BFunctionality.txt
+###A Functionality Code
+https://github.com/Austinbolinger/ECE382_Lab1/blob/master/lab1AFunctionality.txt
+
+#Debugging/Testing
+### Modified Code
+https://github.com/Austinbolinger/ECE382_Lab1/blob/master/TouchUp.txt
+### Final Code
+https://github.com/Austinbolinger/ECE382_Lab1/blob/master/finalTurnIn.txt
+
+Debugging involved a step by step process. I started my process by checking the required functionality. I first made sure each register I need was initialized with a zero like I requested in my code. Then, I moved on to checking that my labels like myProgram and myResults existed. I found out with the help of Dr. York that I needed to initialize ROM before my stop dog watch and reset functions otherwise the program interrupts the code as hex code. After my program was initialized correctly, I stepped through my addition process. I noticed that the addition worked nicely but that was literally all my program did. After talking to C2C Niquette, I understood the importance of a program counter. I thought I could just ask myProgram to increment, but was unable to without the help of another variable register that counted for me. I also realized that I was not doing conditional jumps but unconditional jumps which would never allow for anything but a jump to addition.
+
+Next up, B functionality debugging. This one required an understanding of the Carry flag. I made a code for over flow for addition and multiply and an overflow for subtraction. The both checked for the carry flag set, but one set the result array to 255 and the other to 0. I noticed while debugging that I checked for the carry flag in the wrong spot so it never jumped to that function. After moving the check to right after the math portion, I than noticed that my overflow function needed to increment the counters. 
+
+Last is A functionality. This was hard and took a lot of time to analyze how to go about this. I settled on attempting the O(logn) time. After many hours of working on the code logic I needed to shift and add to create code with the shortest run time, I found out that how I thought code for multiplication and shifting worked was wrong. I determined that the code was not worth the time to recode. I did not look it up online because I am lame. So my multiplication function does not work properly. 
+
+#Results
+I showed my results for the required and B functionality to Dr. York. Both work fine and do not seem to error in any way.
+
+#Documentation
+Worked in class and got help occasionally  from Dr. York, he checked my logic behind my ideas
+
+C2C Niquette - explained how and why I need to use a pointer for each of my arrays(crucial), otherwise the array would never	increment properly.

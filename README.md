@@ -108,7 +108,7 @@ Next up, B functionality debugging. This one required an understanding of the Ca
 Last is A functionality. This was hard and took a lot of time to analyze how to go about this. I settled on attempting the O(logn) time. After many hours of working on the code logic I needed to shift and add to create code with the shortest run time, I found out that how I thought code for multiplication and shifting worked was wrong. I determined that the code was not worth the time to recode. I did not look it up online because I am lame. So my multiplication function does not work properly. 
 
 #Results
-I showed my results for the required and B functionality to Dr. York. Both work fine and do not seem to error in any way.
+I showed my results for the required and B functionality to Dr. York. Both work fine and do not seem to error in any way. Multiplication does not work correctly.
 
 #Documentation
 Worked in class and got help occasionally  from Dr. York, he checked my logic behind my ideas
